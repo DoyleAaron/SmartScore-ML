@@ -47,7 +47,7 @@ def predict_transfer():
 
         # Get second closest match
         distances, indices = model.kneighbors(input_df)
-        recommended_index = int(indices[0][0])  # skip self
+        recommended_index = int(indices[0][1])
 
         # Load the correct CSV
         if 'goalkeeper' in model_filename:
