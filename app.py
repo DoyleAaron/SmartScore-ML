@@ -41,16 +41,38 @@ def predict_transfer():
     model_path = os.path.join('app', 'ML', model_filename)
 
     try:
+        # Load model
         model = joblib.load(model_path)
         input_df = pd.DataFrame([input_data])
+
+        # Get second closest match
         distances, indices = model.kneighbors(input_df)
+        recommended_index = int(indices[0][1])  # skip self-match at [0][0]
 
-        second_index = int(indices[0][1])  # Convert to int for JSON serialisation
+        # Choose CSV based on model name
+        if 'goalkeeper' in model_filename:
+            df = pd.read_csv('app/ML/24_25_prem_keeper_stats.csv')
+        elif 'defender' in model_filename:
+            df = pd.read_csv('app/ML/24_25_defending_clean.csv')
+        else:
+            df = pd.read_csv('app/ML/24_25_combined_players.csv')  # assuming this holds mids/fwds
 
-        return jsonify({'rk': second_index})
+        # Fill missing data in case it’s needed
+        df = df.fillna(df.mean(numeric_only=True))
+
+        # Get player row
+        player = df.iloc[recommended_index]
+
+        return jsonify({
+            'player': player['Player'],
+            'position': player['Pos'],
+            'team': player['Squad'],
+            'distance': round(float(distances[0][1]), 3)
+        })
 
     except Exception as e:
         return jsonify({'error': f'Prediction failed: {e}'}), 500
+
 
 
 
