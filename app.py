@@ -45,21 +45,13 @@ def predict_transfer():
         input_df = pd.DataFrame([input_data])
         distances, indices = model.kneighbors(input_df)
 
-        # Get second best match
-        second_index = indices[0][1]
-        player_data = df.iloc[second_index]
+        second_index = int(indices[0][1])  # Convert to int for JSON serialisation
 
-        return jsonify({
-            'prediction': {
-                'name': player_data['Player'],
-                'position': player_data['Pos'],
-                'team': player_data['Squad'],
-                'distance': round(float(distances[0][1]), 3)
-            }
-        })
+        return jsonify({'rk': second_index})
 
     except Exception as e:
         return jsonify({'error': f'Prediction failed: {e}'}), 500
+
 
 
 
