@@ -47,21 +47,21 @@ def predict_transfer():
 
         # Get second closest match
         distances, indices = model.kneighbors(input_df)
-        recommended_index = int(indices[0][1])  # skip self-match at [0][0]
+        recommended_index = int(indices[0][1])  # skip self
 
-        # Choose CSV based on model name
+        # Load the correct CSV
         if 'goalkeeper' in model_filename:
             df = pd.read_csv('app/ML/24_25_prem_keeper_stats.csv')
         elif 'defender' in model_filename:
             df = pd.read_csv('app/ML/24_25_defending_clean.csv')
         else:
-            df = pd.read_csv('app/ML/24_25_combined_players.csv')  # assuming this holds mids/fwds
+            df = pd.read_csv('app/ML/24_25_combined_players.csv')
 
-        # Fill missing data in case it’s needed
         df = df.fillna(df.mean(numeric_only=True))
 
-        # Get player row
         player = df.iloc[recommended_index]
+
+        print(f"Recommended player: {player['Player']}")  # <- DEBUG
 
         return jsonify({
             'player': player['Player'],
@@ -71,11 +71,10 @@ def predict_transfer():
         })
 
     except Exception as e:
-        return jsonify({'error': f'Prediction failed: {e}'}), 500
-
-
-
-
+        import traceback
+        print("Error occurred:", e)
+        traceback.print_exc()
+        return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
