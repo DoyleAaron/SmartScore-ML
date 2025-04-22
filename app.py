@@ -55,7 +55,7 @@ def predict_transfer():
         elif 'defender' in model_filename:
             df = pd.read_csv('app/ML/24_25_defending_clean.csv')
         else:
-            df = pd.read_csv('app/ML/24_25_combined_players.csv')
+            df = pd.read_csv('app/ML/24_25_prem_players_stats_clean.csv')
 
         df = df.fillna(df.mean(numeric_only=True))
 
