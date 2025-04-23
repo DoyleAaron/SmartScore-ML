@@ -3,7 +3,7 @@ import joblib
 import pandas as pd
 import os
 
-# I had to get some help from ChatGPT to get this code working as I now need to structure it differently depending on the model
+# I had to get some help from ChatGPT to get this code working as I now need to structure it differently depending on the model chosen
 
 app = Flask(__name__)
 
@@ -75,6 +75,34 @@ def predict_transfer():
         print("Error occurred:", e)
         traceback.print_exc()
         return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
+    
+# --- Player Comparison ---
+@app.route('/predict/comparison', methods=['POST'])
+def predict_comparison():
+    data = request.json
+
+    if not data or 'input' not in data or 'model' not in data:
+        return jsonify({'error': 'Missing input or model filename'}), 400
+
+    model_filename = data['model']
+    model_path = os.path.join('app', 'ML', model_filename)
+
+    try:
+        model = joblib.load(model_path)
+        players_df = pd.DataFrame(data['input'])  # Expecting list of two dicts
+
+        ratings = model.predict(players_df)
+
+        recommendation = 0 if ratings[0] > ratings[1] else 1
+
+        return jsonify({
+            'ratings': ratings.tolist(),
+            'recommended_index': recommendation
+        })
+
+    except Exception as e:
+        return jsonify({'error': f'Prediction failed: {e}'}), 500
+
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
