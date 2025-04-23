@@ -92,7 +92,6 @@ def predict_comparison():
         players_df = pd.DataFrame(data['input'])  # Expecting list of two dicts
 
         ratings = model.predict(players_df)
-
         recommendation = 0 if ratings[0] > ratings[1] else 1
 
         return jsonify({
@@ -101,7 +100,9 @@ def predict_comparison():
         })
 
     except Exception as e:
-        return jsonify({'error': f'Prediction failed: {e}'}), 500
+        import traceback
+        traceback.print_exc()  # <- Print full error trace to console
+        return jsonify({'error': f'Prediction failed: {str(e)}'}), 500
 
 
 if __name__ == '__main__':
